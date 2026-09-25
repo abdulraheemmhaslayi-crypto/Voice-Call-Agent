@@ -98,7 +98,7 @@ export const useWebSocketRTC = ({ workflowId, workflowRunId, accessToken, initia
         const envBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || undefined;
         const sdkBaseUrl = client.getConfig().baseUrl;
 
-        let baseUrl = runtimeBackendUrl || envBackendUrl || sdkBaseUrl || 'http://127.0.0.1:8000';
+        let baseUrl: string | undefined = runtimeBackendUrl || envBackendUrl || sdkBaseUrl || 'http://127.0.0.1:8000';
 
         if (typeof window !== 'undefined') {
             const loc = window.location;
