@@ -113,8 +113,9 @@ class VobizProvider(TelephonyProvider):
                 }
             )
 
-        # Add optional parameters
-        data.update(kwargs)
+        # Add optional parameters, filtering out internal Dograh routing keys
+        internal_keys = {"workflow_id", "user_id", "organization_id", "workflow_run_id", "background_tasks"}
+        data.update({k: v for k, v in kwargs.items() if k not in internal_keys})
 
         # Make the API request
         headers = {

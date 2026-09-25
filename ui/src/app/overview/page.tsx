@@ -16,7 +16,7 @@ export default function OverviewPage() {
                     <CardHeader>
                         <CardTitle className="text-3xl">
                             {isOSSMode
-                                ? "Welcome to 3D POWER"
+                                ? "Welcome to Jamure Voice AI"
                                 : `Welcome${
                                       user?.displayName
                                           ? `, ${user.displayName.split(" ")[0]}`

@@ -42,7 +42,7 @@ export const ApiKeyErrorDialog = ({
                                 <p className="font-medium text-foreground">{error}</p>
                                 {isQuotaError && (
                                     <p className="text-muted-foreground">
-                                        Your 3D POWER service credits are too low to start a call.
+                                        Your Jamure Voice AI service credits are too low to start a call.
                                     </p>
                                 )}
                             </div>

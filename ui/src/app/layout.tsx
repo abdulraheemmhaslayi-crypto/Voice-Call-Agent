@@ -28,8 +28,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "3D POWER",
-  description: "Open Source Voice Assistant Workflow Builder",
+  title: "Jamure Voice AI",
+  description: "Jamure Voice AI - Conversational Voice Agent Platform",
 };
 
 export default function RootLayout({

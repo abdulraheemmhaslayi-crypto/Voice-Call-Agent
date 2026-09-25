@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LANGUAGE_DISPLAY_NAMES } from "@/constants/languages";
 
-type ModelMode = "3D_POWER" | "byok";
+type ModelMode = "dograh" | "byok";
 
 interface DograhDefaults {
     voices: string[];
@@ -74,7 +74,7 @@ function isDograhEffectiveConfig(config: Record<string, unknown> | null | undefi
     const llm = asRecord(config.llm);
     const tts = asRecord(config.tts);
     const stt = asRecord(config.stt);
-    return llm?.provider === "3D_POWER" && tts?.provider === "3D_POWER" && stt?.provider === "3D_POWER";
+    return llm?.provider === "dograh" && tts?.provider === "dograh" && stt?.provider === "dograh";
 }
 
 function byokDefaults(defaults: ModelConfigurationDefaultsV2): ServiceConfigurationDefaults {
@@ -138,7 +138,7 @@ function getByokInitialConfig(
     const byokConfiguration = byokConfigToLegacyShape(configuration);
     if (byokConfiguration) return byokConfiguration;
 
-    if (configuration?.mode === "3D_POWER" || isDograhEffectiveConfig(effectiveConfiguration)) {
+    if (configuration?.mode === "dograh" || isDograhEffectiveConfig(effectiveConfiguration)) {
         return emptyByokInitialConfig();
     }
 
@@ -151,7 +151,7 @@ function buildDograhState(
     effectiveConfiguration: Record<string, unknown> | null,
 ): DograhFormState {
     const fallback = defaults.dograh.defaults;
-    const configuredDograh = configuration?.mode === "3D_POWER" ? asRecord(configuration.dograh) : null;
+    const configuredDograh = configuration?.mode === "dograh" ? asRecord(configuration.dograh) : null;
     if (configuredDograh) {
         return {
             api_key: String(configuredDograh.api_key || ""),
@@ -185,10 +185,10 @@ function preferredMode(
     configuration: Record<string, unknown> | null,
     effectiveConfiguration: Record<string, unknown> | null,
 ): ModelMode {
-    if (configuration?.mode === "3D_POWER" || configuration?.mode === "byok") {
-        return configuration.mode;
+    if (configuration?.mode === "dograh" || configuration?.mode === "byok") {
+        return configuration.mode as ModelMode;
     }
-    return isDograhEffectiveConfig(effectiveConfiguration) ? "3D_POWER" : "byok";
+    return isDograhEffectiveConfig(effectiveConfiguration) ? "dograh" : "byok";
 }
 
 function hasRequiredApiKey(
@@ -220,7 +220,7 @@ function requireByokService(
     if (
         !serviceConfiguration
         || !serviceConfiguration.provider
-        || serviceConfiguration.provider === "3D_POWER"
+        || serviceConfiguration.provider === "dograh"
         || !hasRequiredApiKey(service, serviceConfiguration, defaults)
     ) {
         throw new Error(`${service} configuration is required`);
@@ -230,7 +230,7 @@ function requireByokService(
 
 function optionalByokService(config: Record<string, unknown>, service: ServiceSegment): Record<string, unknown> | undefined {
     const serviceConfiguration = asRecord(config[service]);
-    if (!serviceConfiguration?.provider || serviceConfiguration.provider === "3D_POWER") return undefined;
+    if (!serviceConfiguration?.provider || serviceConfiguration.provider === "dograh") return undefined;
     return serviceConfiguration;
 }
 
@@ -242,7 +242,7 @@ export function AIModelConfigurationV2Editor({
     submitLabel = "Save Configuration",
 }: AIModelConfigurationV2EditorProps) {
     const defaultsForByok = useMemo(() => byokDefaults(defaults), [defaults]);
-    const [mode, setMode] = useState<ModelMode>("3D_POWER");
+    const [mode, setMode] = useState<ModelMode>("dograh");
     const [dograh, setDograh] = useState<DograhFormState>(() => ({
         api_key: "",
         voice: defaults.dograh.defaults.voice,
@@ -323,19 +323,19 @@ export function AIModelConfigurationV2Editor({
 
             <Tabs value={mode} onValueChange={(value) => setMode(value as ModelMode)} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2">
-                    {/* <TabsTrigger value="3D_POWER">3D_POWER</TabsTrigger> */}
-                    <TabsTrigger value="byok">3D_POWER</TabsTrigger>
+                    <TabsTrigger value="dograh">Jamure Voice AI</TabsTrigger>
+                    <TabsTrigger value="byok">BYOK</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="3D_POWER" className="mt-0">
+                <TabsContent value="dograh" className="mt-0">
                     <div className="rounded-lg border p-5">
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2 sm:col-span-2">
-                                <Label htmlFor="3D_POWER-api-key">API Key</Label>
+                                <Label htmlFor="dograh-api-key">API Key</Label>
                                 <div className="relative">
                                     <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
-                                        id="3D_POWER-api-key"
+                                        id="dograh-api-key"
                                         className="pl-9"
                                         value={dograh.api_key}
                                         onChange={(event) => setDograh({ ...dograh, api_key: event.target.value })}

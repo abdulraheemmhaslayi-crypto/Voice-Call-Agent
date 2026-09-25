@@ -232,7 +232,7 @@ async def create_user_configuration_with_mps_key(
             response = await client.post(
                 f"{MPS_API_URL}/api/v1/service-keys/",
                 json={
-                    "name": f"Default 3D_POWER Model Service Key",
+                    "name": f"Default Jamure Voice AI Model Service Key",
                     "description": "Auto-generated key for OSS user",
                     "expires_in_days": 7,  # Short-lived for OSS
                     "created_by": user_provider_id,
@@ -243,14 +243,14 @@ async def create_user_configuration_with_mps_key(
             # For authenticated mode, use the secret key and organization ID
             if not DOGRAH_MPS_SECRET_KEY:
                 logger.warning(
-                    "Warning: 3D_POWER_MPS_SECRET_KEY not set for authenticated mode"
+                    "Warning: JAMURE_MPS_SECRET_KEY not set for authenticated mode"
                 )
-                raise ValidationError("Missing 3D_POWER_MPS_SECRET_KEY in non oss mode")
+                raise ValidationError("Missing JAMURE_MPS_SECRET_KEY in non oss mode")
 
             response = await client.post(
                 f"{MPS_API_URL}/api/v1/service-keys/",
                 json={
-                    "name": f"Default 3D_POWER Model Service Key",
+                    "name": f"Default Jamure Voice AI Model Service Key",
                     "description": f"Auto-generated key for organization {organization_id}",
                     "organization_id": organization_id,
                     "expires_in_days": 90,  # Longer-lived for authenticated users

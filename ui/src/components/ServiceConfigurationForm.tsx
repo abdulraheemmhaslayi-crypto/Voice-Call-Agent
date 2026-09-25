@@ -264,7 +264,7 @@ export function ServiceConfigurationForm({
                     ? realtimeSchemas
                     : defaultsData[service as "llm" | "tts" | "stt" | "embeddings"] as Record<string, ProviderSchema> | undefined;
 
-                if (src?.provider) {
+                if (src?.provider && src.provider !== "dograh" && schemaSource?.[src.provider as string]) {
                     Object.entries(src).forEach(([field, value]) => {
                         if (field === "api_key") {
                             if (mode === 'override') {

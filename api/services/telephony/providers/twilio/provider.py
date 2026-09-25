@@ -83,25 +83,26 @@ class TwilioProvider(TelephonyProvider):
         if workflow_run_id:
             backend_endpoint, _ = await get_backend_endpoints()
             callback_url = f"{backend_endpoint}/api/v1/telephony/twilio/status-callback/{workflow_run_id}"
-            data.update(
-                {
-                    "StatusCallback": callback_url,
-                    "StatusCallbackEvent": [
-                        "initiated",
-                        "ringing",
-                        "answered",
-                        "completed",
-                    ],
-                    "StatusCallbackMethod": "POST",
-                }
-            )
+            data["StatusCallback"] = callback_url
 
-        data.update(kwargs)
+        # Filter out internal Dograh kwargs that are not Twilio API parameters
+        internal_keys = {"workflow_id", "user_id", "organization_id", "workflow_run_id", "background_tasks"}
+        data.update({k: v for k, v in kwargs.items() if k not in internal_keys})
+
+        # Build form data list of tuples so list values (such as StatusCallbackEvent)
+        # are encoded as repeated form parameters rather than a Python repr string.
+        form_data = []
+        for key, val in data.items():
+            if isinstance(val, list):
+                for item in val:
+                    form_data.append((key, str(item)))
+            else:
+                form_data.append((key, str(val)))
 
         # Make the API request
         async with aiohttp.ClientSession() as session:
             auth = aiohttp.BasicAuth(self.account_sid, self.auth_token)
-            async with session.post(endpoint, data=data, auth=auth) as response:
+            async with session.post(endpoint, data=form_data, auth=auth) as response:
                 if response.status != 201:
                     error_data = await response.json()
                     raise HTTPException(
@@ -620,15 +621,24 @@ class TwilioProvider(TelephonyProvider):
             "StatusCallbackMethod": "POST",
         }
 
-        # Add any additional kwargs
-        data.update(kwargs)
+        # Add any additional kwargs, filtering out internal Dograh routing keys
+        internal_keys = {"workflow_id", "user_id", "organization_id", "workflow_run_id", "background_tasks"}
+        data.update({k: v for k, v in kwargs.items() if k not in internal_keys})
+
+        form_data = []
+        for key, val in data.items():
+            if isinstance(val, list):
+                for item in val:
+                    form_data.append((key, str(item)))
+            else:
+                form_data.append((key, str(val)))
 
         try:
             logger.debug(f"Transfer call data: {data}")
 
             async with aiohttp.ClientSession() as session:
                 auth = aiohttp.BasicAuth(self.account_sid, self.auth_token)
-                async with session.post(endpoint, data=data, auth=auth) as response:
+                async with session.post(endpoint, data=form_data, auth=auth) as response:
                     response_status = response.status
                     response_text = await response.text()
 

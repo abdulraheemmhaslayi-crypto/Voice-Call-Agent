@@ -82,7 +82,8 @@ class PlivoProvider(TelephonyProvider):
                 }
             )
 
-        data.update(kwargs)
+        internal_keys = {"workflow_id", "user_id", "organization_id", "workflow_run_id", "background_tasks"}
+        data.update({k: v for k, v in kwargs.items() if k not in internal_keys})
 
         async with aiohttp.ClientSession() as session:
             auth = aiohttp.BasicAuth(self.auth_id, self.auth_token)
