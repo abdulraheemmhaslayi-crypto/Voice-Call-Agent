@@ -73,11 +73,11 @@ export interface WorkflowConfigurations {
 export const DEFAULT_WORKFLOW_CONFIGURATIONS: WorkflowConfigurations = {
     ambient_noise_configuration: {
         enabled: false,
-        volume: 0.3
+        volume: 0.2
     },
     max_call_duration: 600,  // 10 minutes
     max_user_idle_timeout: 10,  // 10 seconds
-    smart_turn_stop_secs: 2,  // 2 seconds
-    turn_stop_strategy: 'transcription',  // Default to transcription-based detection
+    smart_turn_stop_secs: 1.2,  // 1.2 seconds for natural, rapid human response time
+    turn_stop_strategy: 'turn_analyzer',  // ML-based natural turn detection (avoids cutting off thinking pauses)
     dictionary: ''
 };

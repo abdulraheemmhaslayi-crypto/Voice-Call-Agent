@@ -480,6 +480,12 @@ async def create_workflow_from_template(
             workflow_data.get("workflow_definition", {})
         )
 
+        # Ensure all nodes have allow_interrupt enabled so conversation feels like a real human (barge-in enabled)
+        if workflow_def and "nodes" in workflow_def:
+            for node in workflow_def["nodes"]:
+                if isinstance(node, dict) and "data" in node and isinstance(node["data"], dict):
+                    node["data"]["allow_interrupt"] = True
+
         trigger_paths = extract_trigger_paths(workflow_def) if workflow_def else []
         if trigger_paths:
             try:

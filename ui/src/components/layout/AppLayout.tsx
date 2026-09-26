@@ -11,7 +11,12 @@ import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sideb
 import { PostHogEvent } from "@/constants/posthog-events";
 import { useAppConfig } from "@/context/AppConfigContext";
 
-import { AppSidebar } from "./AppSidebar";
+import dynamic from "next/dynamic";
+
+const AppSidebar = dynamic(() => import("./AppSidebar").then((m) => m.AppSidebar), {
+  ssr: false,
+});
+import { JamureLogo } from "@/components/JamureLogo";
 import { GitHubStarBadge } from "./GitHubStarBadge";
 
 function AppHeader() {
@@ -23,7 +28,9 @@ function AppHeader() {
         <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label="Open menu" className="md:hidden">
           <Menu className="h-5 w-5" />
         </Button>
-        <Link href="/" className="text-lg font-bold md:hidden">Jamure Voice AI</Link>
+        <Link href="/" className="md:hidden flex items-center">
+          <JamureLogo size="sm" showText={true} />
+        </Link>
       </div>
       <div className="flex items-center gap-3">
           {/*   */}
@@ -87,8 +94,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const pathname = usePathname();
 
   // Check if current route should have sidebar
-  // Hide sidebar for root (/), /handler routes (Stack Auth routes), and /auth routes
-  const shouldShowSidebar = pathname !== "/" && !pathname.startsWith("/handler") && !pathname.startsWith("/auth");
+  // Hide sidebar for root (/), /handler routes (Stack Auth routes), /auth routes, and /call (WhatsApp calling screen)
+  const shouldShowSidebar = pathname !== "/" && !pathname.startsWith("/handler") && !pathname.startsWith("/auth") && !pathname.startsWith("/call");
 
   // Only match the exact editor page /workflow/<id>, not sub-routes like /workflow/<id>/runs
   const isWorkflowEditor = /^\/workflow\/\d+$/.test(pathname);
@@ -133,7 +140,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         </div>
       ) : (
         <div className="flex-1 w-full">
-          <BackendStatusBanner />
+          {!pathname.startsWith("/call") && <BackendStatusBanner />}
           {children}
         </div>
       )}

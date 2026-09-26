@@ -30,6 +30,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Jamure Voice AI",
   description: "Jamure Voice AI - Conversational Voice Agent Platform",
+  icons: {
+    icon: "/jamure-logo.svg",
+    shortcut: "/jamure-logo.svg",
+    apple: "/jamure-logo.svg",
+  },
 };
 
 export default function RootLayout({

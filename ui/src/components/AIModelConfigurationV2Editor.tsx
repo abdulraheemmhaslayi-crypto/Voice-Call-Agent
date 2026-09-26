@@ -322,37 +322,60 @@ export function AIModelConfigurationV2Editor({
             )}
 
             <Tabs value={mode} onValueChange={(value) => setMode(value as ModelMode)} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="dograh">Jamure Voice AI</TabsTrigger>
-                    <TabsTrigger value="byok">BYOK</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50 rounded-xl border border-border/60 shadow-xs">
+                    <TabsTrigger
+                        value="dograh"
+                        className="flex items-center justify-center gap-2 rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
+                    >
+                        Jamure Voice AI (Managed)
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="byok"
+                        className="flex items-center justify-center gap-2 rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
+                    >
+                        BYOK (Custom Providers)
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="dograh" className="mt-0">
-                    <div className="rounded-lg border p-5">
-                        <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-border/70 bg-card p-6 shadow-xs space-y-6">
+                        <div className="flex items-center justify-between pb-4 border-b border-border/50">
+                            <div className="space-y-0.5">
+                                <h3 className="text-sm font-semibold text-foreground">Jamure Managed Voice Engine</h3>
+                                <p className="text-xs text-muted-foreground">High fidelity speech models optimized for low latency Hindi & English conversational calls.</p>
+                            </div>
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                                Recommended
+                            </span>
+                        </div>
+
+                        <div className="grid gap-5 sm:grid-cols-2">
                             <div className="space-y-2 sm:col-span-2">
-                                <Label htmlFor="dograh-api-key">API Key</Label>
+                                <Label htmlFor="dograh-api-key" className="text-xs font-semibold text-foreground">
+                                    API Key
+                                </Label>
                                 <div className="relative">
                                     <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="dograh-api-key"
-                                        className="pl-9"
+                                        className="pl-9 h-10 rounded-lg text-xs"
                                         value={dograh.api_key}
                                         onChange={(event) => setDograh({ ...dograh, api_key: event.target.value })}
-                                        placeholder="Enter API key"
+                                        placeholder="Enter Jamure API key"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Voice</Label>
+                                <Label className="text-xs font-semibold text-foreground">Voice</Label>
                                 <Select value={dograh.voice} onValueChange={(voice) => setDograh({ ...dograh, voice })}>
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full h-10 rounded-lg text-xs">
                                         <SelectValue placeholder="Select voice" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-xl">
                                         {defaults.dograh.voices.map((voice) => (
-                                            <SelectItem key={voice} value={voice}>
+                                            <SelectItem key={voice} value={voice} className="text-xs">
                                                 {voice}
                                             </SelectItem>
                                         ))}
@@ -361,17 +384,17 @@ export function AIModelConfigurationV2Editor({
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Speed</Label>
+                                <Label className="text-xs font-semibold text-foreground">Speed</Label>
                                 <Select
                                     value={String(dograh.speed)}
                                     onValueChange={(speed) => setDograh({ ...dograh, speed: Number(speed) })}
                                 >
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full h-10 rounded-lg text-xs">
                                         <SelectValue placeholder="Select speed" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-xl">
                                         {defaults.dograh.speeds.map((speed) => (
-                                            <SelectItem key={speed} value={String(speed)}>
+                                            <SelectItem key={speed} value={String(speed)} className="text-xs">
                                                 {speed}x
                                             </SelectItem>
                                         ))}
@@ -380,14 +403,14 @@ export function AIModelConfigurationV2Editor({
                             </div>
 
                             <div className="space-y-2 sm:col-span-2">
-                                <Label>Language</Label>
+                                <Label className="text-xs font-semibold text-foreground">Language</Label>
                                 <Select value={dograh.language} onValueChange={(language) => setDograh({ ...dograh, language })}>
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full h-10 rounded-lg text-xs">
                                         <SelectValue placeholder="Select language" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-xl">
                                         {defaults.dograh.languages.map((language) => (
-                                            <SelectItem key={language} value={language}>
+                                            <SelectItem key={language} value={language} className="text-xs">
                                                 {LANGUAGE_DISPLAY_NAMES[language] || language}
                                             </SelectItem>
                                         ))}
@@ -396,7 +419,12 @@ export function AIModelConfigurationV2Editor({
                             </div>
                         </div>
 
-                        <Button type="button" className="mt-6 w-full" onClick={saveDograhConfiguration} disabled={isSavingDograh}>
+                        <Button
+                            type="button"
+                            className="mt-6 w-full h-10 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs transition-colors"
+                            onClick={saveDograhConfiguration}
+                            disabled={isSavingDograh}
+                        >
                             <Save className="mr-2 h-4 w-4" />
                             {isSavingDograh ? "Saving..." : submitLabel}
                         </Button>

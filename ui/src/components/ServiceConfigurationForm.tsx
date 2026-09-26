@@ -868,13 +868,13 @@ export function ServiceConfigurationForm({
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             {/* Realtime toggle */}
-            <div className="flex items-center justify-between mb-4 p-4 border rounded-lg">
+            <div className="flex items-center justify-between mb-5 p-4 border border-border/70 rounded-xl bg-card shadow-xs">
                 <div>
-                    <Label htmlFor="realtime-toggle" className="text-sm font-medium">
-                        Realtime Mode
+                    <Label htmlFor="realtime-toggle" className="text-sm font-semibold text-foreground">
+                        Realtime Speech-to-Speech Mode
                     </Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                        Uses a single speech-to-speech model (no separate STT/TTS). An LLM is still required for variable extraction and QA.
+                        Uses a single ultra-low latency model (no separate STT/TTS). An LLM is still configured for variable extraction and QA.
                     </p>
                 </div>
                 <Switch
@@ -884,19 +884,23 @@ export function ServiceConfigurationForm({
                 />
             </div>
 
-            <Card>
-                <CardContent className="pt-6">
+            <Card className="rounded-2xl border border-border/70 shadow-xs bg-card overflow-hidden">
+                <CardContent className="p-6">
                     <Tabs key={defaultTab} defaultValue={defaultTab} className="w-full">
-                        <TabsList className="grid w-full mb-6" style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)` }}>
+                        <TabsList className="grid w-full h-10 p-1 bg-muted/50 rounded-xl border border-border/60 mb-6 shadow-inner" style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)` }}>
                             {visibleTabs.map(({ key, label }) => (
-                                <TabsTrigger key={key} value={key}>
+                                <TabsTrigger
+                                    key={key}
+                                    value={key}
+                                    className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
+                                >
                                     {label}
                                 </TabsTrigger>
                             ))}
                         </TabsList>
 
                         {visibleTabs.map(({ key, label }) => (
-                            <TabsContent key={key} value={key} className="mt-0">
+                            <TabsContent key={key} value={key} className="mt-0 space-y-4">
                                 {mode === 'override' && renderOverrideToggle(key, label)}
                                 {(mode === 'global' || enabledOverrides[key]) && renderServiceFields(key)}
                             </TabsContent>
@@ -905,9 +909,17 @@ export function ServiceConfigurationForm({
                 </CardContent>
             </Card>
 
-            {apiError && <p className="text-red-500 mt-4">{apiError}</p>}
+            {apiError && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive mt-4">
+                    {apiError}
+                </div>
+            )}
 
-            <Button type="submit" className="w-full mt-6" disabled={isSaving}>
+            <Button
+                type="submit"
+                className="w-full h-10 mt-6 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs transition-colors"
+                disabled={isSaving}
+            >
                 {isSaving ? "Saving..." : (submitLabel || "Save Configuration")}
             </Button>
         </form>

@@ -24,12 +24,12 @@ interface DispositionChartProps {
 }
 
 const COLORS = [
-  '#3b82f6', // blue-500
-  '#10b981', // emerald-500
-  '#f59e0b', // amber-500
-  '#8b5cf6', // violet-500
-  '#ef4444', // red-500
-  '#6b7280', // gray-500 for "Other"
+  '#2563EB', // blue-600
+  '#059669', // emerald-600
+  '#D97706', // amber-600
+  '#7C3AED', // violet-600
+  '#E11D48', // rose-600
+  '#64748B', // slate-500
 ];
 
 export function DispositionChart({ data }: DispositionChartProps) {
@@ -40,12 +40,18 @@ export function DispositionChart({ data }: DispositionChartProps) {
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: DispositionData & { fill: string } }> }) => {
     if (active && payload && payload[0]) {
-      const data = payload[0].payload;
+      const itemData = payload[0].payload;
       return (
-        <div className="bg-background border rounded-lg shadow-lg p-3">
-          <p className="font-semibold">{data.disposition}</p>
-          <p className="text-sm">Count: {data.count}</p>
-          <p className="text-sm">{data.percentage}% of total</p>
+        <div className="bg-card border border-border/70 rounded-xl shadow-md p-3 text-xs space-y-1">
+          <p className="font-semibold text-foreground text-sm">{itemData.disposition}</p>
+          <div className="flex items-center justify-between gap-4 text-muted-foreground">
+            <span>Call Count:</span>
+            <span className="font-medium text-foreground">{itemData.count.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4 text-muted-foreground">
+            <span>Percentage:</span>
+            <span className="font-medium text-foreground">{itemData.percentage}%</span>
+          </div>
         </div>
       );
     }
@@ -53,36 +59,44 @@ export function DispositionChart({ data }: DispositionChartProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Disposition Distribution</CardTitle>
+    <Card className="rounded-2xl border border-border/70 bg-card shadow-xs overflow-hidden">
+      <CardHeader className="pb-3 border-b border-border/50">
+        <div className="space-y-0.5">
+          <CardTitle className="text-base font-semibold tracking-tight text-foreground">
+            Call Dispositions
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Distribution of call outcome and resolution tags
+          </p>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         {data.length === 0 ? (
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-            No disposition data available
+          <div className="h-[280px] flex items-center justify-center text-xs text-muted-foreground">
+            No disposition records found for this period
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart
               data={chartData}
               layout="horizontal"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 10, right: 20, left: 10, bottom: 25 }}
             >
-              <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+              <CartesianGrid strokeDasharray="3 3" opacity={0.15} vertical={false} />
               <XAxis
                 dataKey="disposition"
-                angle={-45}
+                angle={-30}
                 textAnchor="end"
-                height={80}
+                height={55}
                 interval={0}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               />
               <YAxis
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                allowDecimals={false}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
@@ -94,3 +108,4 @@ export function DispositionChart({ data }: DispositionChartProps) {
     </Card>
   );
 }
+

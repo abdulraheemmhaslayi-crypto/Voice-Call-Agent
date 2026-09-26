@@ -266,9 +266,85 @@ async def rewind_text_chat_session(
             cursor_turn_id=request.cursor_turn_id,
             expected_revision=request.expected_revision,
         )
-    except TextChatTurnNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except TextChatSessionRevisionConflictError as e:
-        raise HTTPException(status_code=409, detail=_revision_conflict_detail(e))
-
     return _build_response(text_session)
+
+
+class SimulateUserTurnRequest(BaseModel):
+    persona_prompt: str
+    last_assistant_message: str | None = None
+
+
+class SimulateUserTurnResponse(BaseModel):
+    simulated_message: str
+
+
+@router.post(
+    "/{workflow_id}/text-chat/sessions/{run_id}/simulate-user-turn",
+    response_model=SimulateUserTurnResponse,
+)
+async def simulate_user_turn(
+    workflow_id: int,
+    run_id: int,
+    request: SimulateUserTurnRequest,
+    user: UserModel = Depends(get_user_with_selected_organization),
+) -> SimulateUserTurnResponse:
+    text_session = await _load_text_session_or_404(workflow_id, run_id, user)
+    workflow_run = text_session.workflow_run
+
+    # Extract conversation turns
+    session_data = text_session.session_data or {}
+    turns = session_data.get("turns", [])
+    messages: list[dict] = []
+    for turn in turns:
+        if turn.get("assistant_message") and turn["assistant_message"].get("text"):
+            messages.append({"role": "assistant", "content": turn["assistant_message"]["text"]})
+        if turn.get("user_message") and turn["user_message"].get("text"):
+            messages.append({"role": "user", "content": turn["user_message"]["text"]})
+
+    # If there's a last assistant message
+    if request.last_assistant_message and (not messages or messages[-1].get("content") != request.last_assistant_message):
+        messages.append({"role": "assistant", "content": request.last_assistant_message})
+
+    system_prompt = f"""You are simulating a human caller on a live phone call with a voice AI assistant.
+Your persona and objective:
+<persona>
+{request.persona_prompt}
+</persona>
+
+Guidelines:
+- Reply strictly as the human caller in 1 to 2 short conversational sentences.
+- Speak naturally with everyday human tone and phrasing.
+- Stay in character and directly respond to what the assistant just asked or said.
+- Do NOT output any quotes, markdown, asterisks, or prefix labels. Return only your spoken words."""
+
+    if not messages:
+        messages = [{"role": "user", "content": "Hello."}]
+
+    try:
+        from api.services.workflow.qa.llm_config import resolve_user_llm_config
+        from api.services.pipecat.service_factory import create_llm_service_from_provider
+        from pipecat.processors.aggregators.llm_context import LLMContext
+
+        provider, model, api_key, kwargs = await resolve_user_llm_config(workflow_run)
+        llm = create_llm_service_from_provider(provider, model, api_key, **kwargs)
+        context = LLMContext()
+        context.set_messages(messages)
+        simulated_text = await llm.run_inference(context, system_instruction=system_prompt)
+        if not simulated_text or not simulated_text.strip():
+            simulated_text = "Hi, can you explain more about your services and pricing?"
+    except Exception as e:
+        from loguru import logger
+        logger.warning(f"Error in simulate_user_turn LLM inference: {e}")
+        persona_lower = request.persona_prompt.lower()
+        if "pricing" in persona_lower or "cost" in persona_lower or "budget" in persona_lower:
+            simulated_text = "Could you tell me a bit more about your pricing and packages?"
+        elif "skeptical" in persona_lower:
+            simulated_text = "I'm still comparing options. What makes your service better than others?"
+        elif "whatsapp" in persona_lower or "sample" in persona_lower:
+            simulated_text = "Can you share some portfolio samples and details on my WhatsApp?"
+        else:
+            simulated_text = "Yes, I would like to know how we can proceed with this."
+
+    cleaned_text = simulated_text.strip().strip('"\'')
+    return SimulateUserTurnResponse(simulated_message=cleaned_text)
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MessageSquareText, Mic, Phone, RefreshCw, X } from "lucide-react";
+import { Loader2, MessageSquareText, Mic, Phone, Radio, RefreshCw, Sparkles, X, Zap } from "lucide-react";
 import posthog from "posthog-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import { useOnboarding } from "@/context/OnboardingContext";
 import { useAuth } from "@/lib/auth";
 import { cn, getRandomId } from "@/lib/utils";
 
-import { AiSimulatorPlaceholder } from "./workflow-tester/AiSimulatorPlaceholder";
+import { AiSimulatorPanel } from "./workflow-tester/AiSimulatorPanel";
 import { EmbeddedVoiceTester } from "./workflow-tester/EmbeddedVoiceTester";
 import { ManualTextChatPanel } from "./workflow-tester/ManualTextChatPanel";
 import { ChatModeToggle, DisabledNotice, EmptyState } from "./workflow-tester/shared";
@@ -150,29 +150,44 @@ export function WorkflowTesterPanel({
                 onValueChange={(value) => setActiveMode(value as "audio" | "text")}
                 className="min-h-0 flex-1 gap-0"
             >
-                <div className="border-b border-border/70 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                        <TabsList className="grid h-9 flex-1 grid-cols-2 rounded-lg bg-muted/60 p-1">
-                            <TabsTrigger value="audio" className="rounded-md text-sm">
-                                <Mic className="h-4 w-4" />
-                                Test Audio
-                            </TabsTrigger>
-                            <TabsTrigger value="text" className="rounded-md text-sm">
-                                <MessageSquareText className="h-4 w-4" />
-                                Test Chat
-                            </TabsTrigger>
-                        </TabsList>
+                <div className="border-b border-border/60 bg-muted/20 px-4 py-3 backdrop-blur-xs">
+                    <div className="mb-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+                            <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                Agent Test Studio
+                            </span>
+                        </div>
                         {onClose ? (
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
-                                className="shrink-0 text-muted-foreground hover:text-foreground"
+                                className="h-7 w-7 rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                 aria-label="Close tester panel"
                             >
                                 <X className="h-4 w-4" />
                             </Button>
                         ) : null}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <TabsList className="grid h-10 flex-1 grid-cols-2 rounded-xl bg-muted/60 p-1 shadow-inner">
+                            <TabsTrigger
+                                value="audio"
+                                className="flex items-center gap-2 rounded-lg text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                            >
+                                <Mic className="h-3.5 w-3.5 text-primary" />
+                                Voice Call
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="text"
+                                className="flex items-center gap-2 rounded-lg text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                            >
+                                <MessageSquareText className="h-3.5 w-3.5 text-violet-500" />
+                                Text Chat
+                            </TabsTrigger>
+                        </TabsList>
                     </div>
                 </div>
 
@@ -200,28 +215,45 @@ export function WorkflowTesterPanel({
                             <>
                                 {effectiveDisabledReason ? <DisabledNotice reason={effectiveDisabledReason} /> : null}
                                 <EmptyState
-                                    icon={<Phone className="h-7 w-7" />}
-                                    title="Call this agent in the browser"
-                                    description="Test the agent over a voice call. Some telephony-only tools, like call transfer, are not yet supported here."
+                                    visualVariant="audio"
+                                    icon={<Phone className="h-6 w-6" />}
+                                    title="Real-Time Voice Call"
+                                    description="Start an interactive voice call right in your browser. Talk naturally, test interruptions, and watch the workflow transition in real-time."
+                                    badges={[
+                                        {
+                                            icon: <Radio className="h-3.5 w-3.5" />,
+                                            label: "WebRTC Ultra-Low Latency Audio",
+                                        },
+                                        {
+                                            icon: <Zap className="h-3.5 w-3.5" />,
+                                            label: "Full Duplex & Real Human Barge-in",
+                                        },
+                                        {
+                                            icon: <Sparkles className="h-3.5 w-3.5" />,
+                                            label: "Live Visual Node Tracing on Canvas",
+                                        },
+                                    ]}
                                     action={
                                         <Button
                                             ref={runTestButtonRef}
                                             onClick={createVoiceRun}
                                             disabled={creatingVoiceRun || testerBlocked}
+                                            className="w-full h-10 rounded-lg font-medium shadow-xs"
                                         >
                                             {creatingVoiceRun ? (
                                                 <>
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                    Starting test...
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    Connecting Voice Studio...
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Phone className="h-4 w-4" />
-                                                    Run Test
+                                                    <Phone className="h-4 w-4 mr-2" />
+                                                    Start Voice Call
                                                 </>
                                             )}
                                         </Button>
                                     }
+                                    tip="💡 Wear headphones for the clearest echo-free voice test."
                                 />
                             </>
                         )}
@@ -258,7 +290,16 @@ export function WorkflowTesterPanel({
                                 onNodeTransition={onRuntimeNodeTransition}
                             />
                         ) : (
-                            <AiSimulatorPlaceholder disabledReason={effectiveDisabledReason} />
+                            <AiSimulatorPanel
+                                key={chatSessionKey}
+                                workflowId={workflowId}
+                                ready={tokenReady && !!accessToken}
+                                initialContextVariables={initialContextVariables}
+                                disabled={testerBlocked}
+                                disabledReason={effectiveDisabledReason}
+                                onActiveChange={setChatActive}
+                                onNodeTransition={onRuntimeNodeTransition}
+                            />
                         )}
                     </div>
                 </TabsContent>

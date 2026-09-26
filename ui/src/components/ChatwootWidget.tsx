@@ -26,7 +26,7 @@ export default function ChatwootWidget() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const isWorkflowPage = /^\/workflow\/[^/]+(?:\/.*)?$/.test(pathname);
+    const isWorkflowPage = /^\/workflow\/[^/]+(?:\/.*)?$/.test(pathname) || pathname.startsWith("/call");
 
     if (isWorkflowPage) {
       document.getElementById("cw-widget-holder")?.remove();

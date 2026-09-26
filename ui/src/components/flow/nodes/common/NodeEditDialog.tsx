@@ -1,4 +1,4 @@
-import { AlertCircle, ExternalLink } from "lucide-react";
+import { AlertCircle, ExternalLink, Sparkles, Zap } from "lucide-react";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { useWorkflowOptional } from "@/app/workflow/[workflowId]/contexts/WorkflowContext";
@@ -88,24 +88,25 @@ export const NodeEditDialog = ({
                 className="max-h-[85vh] overflow-y-auto"
                 style={{ maxWidth: "1200px", width: "95vw" }}
             >
-                <DialogHeader>
-                    {/* <div className="flex items-center justify-between">
-                        <DialogTitle>{title}</DialogTitle>
-                        {documentationUrl && (
-                            <a
-                                href={documentationUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors pr-6"
-                            >
-                                Docs
-                                <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                        )}
-                    </div> */}
-                    <DialogDescription>
-                        Configure the settings for this node in your workflow.
-                    </DialogDescription>
+                <DialogHeader className="space-y-2 pb-1 border-b border-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pr-6">
+                        <div>
+                            <DialogTitle className="text-xl font-bold">{title || "Configure Node"}</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                                Configure the settings for this node in your workflow.
+                            </DialogDescription>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <Zap className="w-3.5 h-3.5 text-emerald-500" />
+                                Barge-in Allowed
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                Real-Time Voice Mode
+                            </span>
+                        </div>
+                    </div>
                     {nodeData.invalid && nodeData.validationMessage && (
                         <div className="mt-2 flex items-center gap-2 rounded-md bg-red-50 p-2 text-sm text-red-500 border border-red-200">
                             <AlertCircle className="h-4 w-4" />

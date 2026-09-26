@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { AlertCircle, Box, CheckCircle2, ExternalLink, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -176,39 +176,41 @@ export default function ModelConfigurationV2({
     if (source !== "organization_v2") {
         return (
             <div className="w-full max-w-4xl mx-auto space-y-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-bold">AI Models Configuration</h1>
-                            <Badge variant="outline">
-                                {source === "legacy_user_v1" ? "legacy" : "v1"}
-                            </Badge>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/60">
+                    <div className="flex items-center gap-3.5">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+                            <Box className="h-5 w-5" />
                         </div>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Configure your AI model, voice, and transcription services.{" "}
-                            {/* {docsUrl && (
-                                <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline">
-                                    Learn more <ExternalLink className="h-3 w-3" />
-                                </a>
-                            )} */}
-                        </p>
+                        <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl font-bold tracking-tight text-foreground">AI Models Configuration</h1>
+                                <span className="inline-flex items-center rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                    {source === "legacy_user_v1" ? "legacy" : "v1"}
+                                </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Configure your AI model, voice synthesis, and transcription services.
+                            </p>
+                        </div>
                     </div>
                     {source === "legacy_user_v1" && (
-                        <Button type="button" variant="outline" onClick={() => setMigrationDialogOpen(true)} disabled={migrating}>
-                            <RefreshCw className="mr-2 h-4 w-4" />
+                        <Button type="button" variant="outline" onClick={() => setMigrationDialogOpen(true)} disabled={migrating} className="rounded-lg h-9 text-xs">
+                            <RefreshCw className="mr-2 h-3.5 w-3.5" />
                             {migrating ? "Migrating..." : "Migrate to v2"}
                         </Button>
                     )}
                 </div>
 
                 {error && (
-                    <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                        {error}
+                    <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive flex items-center gap-2.5">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{error}</span>
                     </div>
                 )}
                 {notice && (
-                    <div className="rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
-                        {notice}
+                    <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <span>{notice}</span>
                     </div>
                 )}
 
@@ -235,28 +237,35 @@ export default function ModelConfigurationV2({
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">AI Models Configuration</h1>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Organization-scoped model settings.{" "}
-                        {/* {docsUrl && (
-                            <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 underline">
-                                Learn more <ExternalLink className="h-3 w-3" />
-                            </a>
-                        )} */}
-                    </p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2 border-b border-border/60">
+                <div className="flex items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+                        <Box className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl font-bold tracking-tight text-foreground">AI Models Configuration</h1>
+                            <span className="inline-flex items-center rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                                Organization V2
+                            </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Configure your organization-scoped speech models, LLM providers, and voice presets.
+                        </p>
+                    </div>
                 </div>
             </div>
 
             {error && (
-                <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                    {error}
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive flex items-center gap-2.5">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{error}</span>
                 </div>
             )}
             {notice && (
-                <div className="rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
-                    {notice}
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <span>{notice}</span>
                 </div>
             )}
 

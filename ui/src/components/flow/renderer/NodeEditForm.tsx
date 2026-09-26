@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import type { NodeSpec } from "@/client/types.gen";
 
 import { evaluateDisplayOptions } from "./displayOptions";
+import { HumanVoiceToolbar } from "./HumanVoiceToolbar";
 import { PropertyInput, type RendererContext } from "./PropertyInput";
 
 export interface NodeEditFormProps {
@@ -30,8 +31,13 @@ export function NodeEditForm({ spec, values, onChange, context }: NodeEditFormPr
         [values, onChange],
     );
 
+    const hasPromptField = spec.properties.some((p) => p.name === "prompt");
+
     return (
         <div className="grid gap-3">
+            {hasPromptField && (
+                <HumanVoiceToolbar values={values} onChange={onChange} />
+            )}
             {spec.properties
                 .filter((p) => evaluateDisplayOptions(p.display_options, values))
                 .map((p) => (

@@ -24,6 +24,7 @@ import AddNodePanel from "../../../components/flow/AddNodePanel";
 import CustomEdge from "../../../components/flow/edges/CustomEdge";
 import { GenericNode } from "../../../components/flow/nodes/GenericNode";
 import { PhoneCallDialog } from './components/PhoneCallDialog';
+import { WhatsAppCallDialog } from './components/WhatsAppCallDialog';
 import { VersionHistoryPanel, WorkflowVersion } from './components/VersionHistoryPanel';
 import type { WorkflowRuntimeNodeTransition } from './components/workflow-tester/types';
 import { WorkflowEditorHeader } from "./components/WorkflowEditorHeader";
@@ -77,6 +78,7 @@ function RenderWorkflow({
     const { specs } = useNodeSpecs();
     const { hasCompletedAction } = useOnboarding();
     const [isPhoneCallDialogOpen, setIsPhoneCallDialogOpen] = useState(false);
+    const [isWhatsAppCallDialogOpen, setIsWhatsAppCallDialogOpen] = useState(false);
     const [isVersionPanelOpen, setIsVersionPanelOpen] = useState(false);
     const [isTesterRailOpen, setIsTesterRailOpen] = useState(true);
     const [isTesterSheetOpen, setIsTesterSheetOpen] = useState(false);
@@ -492,6 +494,7 @@ function RenderWorkflow({
                     saveWorkflow={guardedSaveWorkflow}
                     user={user}
                     onPhoneCallClick={() => setIsPhoneCallDialogOpen(true)}
+                    onWhatsAppCallClick={() => setIsWhatsAppCallDialogOpen(true)}
                     onTestAgentClick={handleOpenTester}
                     onHistoryClick={handleOpenVersionPanel}
                     activeVersionLabel={activeVersionLabel}
@@ -709,6 +712,13 @@ function RenderWorkflow({
                     onOpenChange={setIsPhoneCallDialogOpen}
                     workflowId={workflowId}
                     user={user}
+                />
+
+                <WhatsAppCallDialog
+                    open={isWhatsAppCallDialogOpen}
+                    onOpenChange={setIsWhatsAppCallDialogOpen}
+                    workflowId={workflowId}
+                    workflowName={workflowName ?? "Jamure Voice AI"}
                 />
             </div>
         </WorkflowProvider>

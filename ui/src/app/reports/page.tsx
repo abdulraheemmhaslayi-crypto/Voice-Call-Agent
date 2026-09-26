@@ -1,8 +1,8 @@
 'use client';
 
 import { addDays, format, subDays } from 'date-fns';
-import { Calendar, ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { BarChart3, Calendar, ChevronLeft, ChevronRight, Download, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import {
   getDailyReportApiV1OrganizationsReportsDailyGet,
@@ -198,60 +198,108 @@ export default function ReportsPage() {
   const isToday = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-bold">Daily Reports</h1>
+    <div className="container mx-auto p-6 space-y-6 max-w-7xl">
+      {/* Top Header & Filters Bar */}
+      <div className="flex flex-col gap-4 pb-4 border-b border-border/60">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Brand Header */}
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-foreground">Daily Reports & Analytics</h1>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Live Sync
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Overview of call outcomes, disposition breakdown, and duration metrics.
+              </p>
+            </div>
+          </div>
 
-        {/* Date Navigation & Workflow Selector */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          {/* Workflow Selector */}
-          <Select value={selectedWorkflow} onValueChange={setSelectedWorkflow}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select workflow" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Workflows</SelectItem>
-              {workflows.map((workflow) => (
-                <SelectItem key={workflow.id} value={workflow.id.toString()}>
-                  {workflow.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Date Navigation */}
-          <div className="flex items-center gap-2">
+          {/* Download CSV Button */}
+          {!loading && report && report.metrics.total_runs > 0 && (
             <Button
-              variant="outline"
+              onClick={handleDownloadCSV}
+              className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs transition-colors px-4 self-start sm:self-auto"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download CSV
+            </Button>
+          )}
+        </div>
+
+        {/* Filter Controls Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          {/* Left: Workflow Selector */}
+          <div className="flex items-center gap-2.5">
+            <Select value={selectedWorkflow} onValueChange={setSelectedWorkflow}>
+              <SelectTrigger className="w-[220px] h-10 rounded-xl text-xs font-medium border-border/70 bg-card shadow-xs">
+                <SelectValue placeholder="Select workflow" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all" className="text-xs font-medium">
+                  All Voice Agents & Workflows
+                </SelectItem>
+                {workflows.map((workflow) => (
+                  <SelectItem key={workflow.id} value={workflow.id.toString()} className="text-xs">
+                    {workflow.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <span className="text-xs text-muted-foreground hidden md:inline">
+              Timezone: <span className="font-medium text-foreground">{timezone}</span>
+            </span>
+          </div>
+
+          {/* Right: Date Navigation */}
+          <div className="flex items-center gap-1.5 rounded-xl border border-border/70 bg-card p-1 shadow-xs">
+            <Button
+              variant="ghost"
               size="icon"
               onClick={handlePreviousDay}
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+              aria-label="Previous Day"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[200px]">
-                  <Calendar className="mr-2 h-4 w-4" />
+                <Button variant="ghost" className="h-8 px-3 text-xs font-semibold text-foreground">
+                  <Calendar className="mr-2 h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                   {format(selectedDate, 'MMM dd, yyyy')}
+                  {isToday && (
+                    <span className="ml-1.5 rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                      Today
+                    </span>
+                  )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0 rounded-2xl shadow-lg border-border/70">
                 <CalendarPicker
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
                   disabled={(date) => date > new Date()}
+                  className="rounded-2xl"
                 />
               </PopoverContent>
             </Popover>
 
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={handleNextDay}
               disabled={isToday}
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-40"
+              aria-label="Next Day"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -259,53 +307,31 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Timezone Display and Download Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <div className="text-sm text-muted-foreground">
-          Showing data for {timezone} timezone
-          {selectedWorkflow !== 'all' && (
-            <span> • Filtered by: {workflows.find(w => w.id.toString() === selectedWorkflow)?.name}</span>
-          )}
-        </div>
-
-        {/* Download CSV Button */}
-        {!loading && report && report.metrics.total_runs > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadCSV}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download CSV
-          </Button>
-        )}
-      </div>
-
       {/* Loading State */}
       {loading && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Skeleton className="h-[120px]" />
-            <Skeleton className="h-[120px]" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="h-[120px] rounded-2xl" />
+            <Skeleton className="h-[120px] rounded-2xl" />
+            <Skeleton className="h-[120px] rounded-2xl" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-[300px]" />
-            <Skeleton className="h-[300px]" />
+            <Skeleton className="h-[340px] rounded-2xl" />
+            <Skeleton className="h-[340px] rounded-2xl" />
           </div>
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <Card className="p-6">
-          <p className="text-center text-red-500">{error}</p>
-        </Card>
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-6 text-center text-xs text-destructive">
+          {error}
+        </div>
       )}
 
       {/* Report Content */}
       {report && !loading && !error && (
-        <>
+        <div className="space-y-6">
           {/* Metrics Cards */}
           <MetricsCards metrics={report.metrics} />
 
@@ -317,14 +343,18 @@ export default function ReportsPage() {
 
           {/* No Data Message */}
           {report.metrics.total_runs === 0 && (
-            <Card className="p-6">
-              <p className="text-center text-muted-foreground">
+            <div className="rounded-2xl border border-border/70 bg-card p-10 text-center shadow-xs">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-3">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground">No call sessions recorded</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
                 No workflow runs found for {format(selectedDate, 'MMMM dd, yyyy')}
-                {selectedWorkflow !== 'all' && ' for the selected workflow'}
+                {selectedWorkflow !== 'all' && ` on "${workflows.find(w => w.id.toString() === selectedWorkflow)?.name}"`}
               </p>
-            </Card>
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

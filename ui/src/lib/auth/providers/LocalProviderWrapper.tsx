@@ -24,8 +24,8 @@ export function LocalProviderWrapper({ children }: { children: React.ReactNode }
           setUser(data.user);
           logger.info('OSS auth initialized', { user: data.user });
         } else if (response.status === 401) {
-          // No token - redirect to login (but not if already on auth pages)
-          if (!window.location.pathname.startsWith('/auth/')) {
+          // No token - redirect to login (but not if already on auth pages or public call pages)
+          if (!window.location.pathname.startsWith('/auth/') && !window.location.pathname.startsWith('/call')) {
             window.location.href = '/auth/login';
             return;
           }

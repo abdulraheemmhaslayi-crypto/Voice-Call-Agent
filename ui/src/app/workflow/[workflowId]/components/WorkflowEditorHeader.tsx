@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactFlowInstance } from "@xyflow/react";
-import { AlertCircle, ArrowLeft, Bot, Clipboard, Copy, Download, Eye, History, LoaderCircle, Menu, MoreVertical, Pencil, Phone, Rocket } from "lucide-react";
+import { AlertCircle, ArrowLeft, Bot, Clipboard, Copy, Download, Eye, History, LoaderCircle, Menu, MoreVertical, Pencil, Phone, PhoneCall, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ interface WorkflowEditorHeaderProps {
     user: { id: string; email?: string };
     onPhoneCallClick: () => void;
     onTestAgentClick: () => void;
+    onWhatsAppCallClick?: () => void;
     onHistoryClick: () => void;
     activeVersionLabel?: string;
     isViewingHistoricalVersion: boolean;
@@ -56,6 +57,7 @@ export const WorkflowEditorHeader = ({
     saveWorkflow,
     onPhoneCallClick,
     onTestAgentClick,
+    onWhatsAppCallClick,
     onHistoryClick,
     activeVersionLabel,
     isViewingHistoricalVersion,
@@ -418,6 +420,18 @@ export const WorkflowEditorHeader = ({
                     >
                         <Phone className="w-4 h-4" />
                         Phone Call
+                    </Button>
+                )}
+
+                {onWhatsAppCallClick && (
+                    <Button
+                        variant="outline"
+                        className="flex items-center gap-1.5 bg-[#25D366]/10 border-[#25D366]/40 hover:bg-[#25D366]/20 text-[#25D366] px-3 sm:px-4"
+                        onClick={onWhatsAppCallClick}
+                        title="WhatsApp Voice Call Link (100% Free)"
+                    >
+                        <PhoneCall className="w-4 h-4" />
+                        <span className="hidden sm:inline font-medium">WhatsApp Call</span>
                     </Button>
                 )}
 

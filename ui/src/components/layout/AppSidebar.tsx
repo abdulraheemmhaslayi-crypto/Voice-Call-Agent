@@ -2,30 +2,30 @@
 
 import type { Team } from "@stackframe/stack";
 import {
+  Activity,
   AlertTriangle,
-  ArrowUpCircle,
   AudioLines,
-  Brain,
+  Box,
   ChevronLeft,
-  ChevronRight,
+  ChevronsUpDown,
   CircleDollarSign,
-  Database,
+  Code2,
   FileText,
+  Folder,
   Home,
-  Key,
   LogOut,
   type LucideIcon,
-  Megaphone,
+  MessageSquare,
   Phone,
+  Send,
   Settings,
-  TrendingUp,
-  Workflow,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useRef } from "react";
 
+import { JamureLogo } from "@/components/JamureLogo";
 import ThemeToggle from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,29 +76,29 @@ const NAV_SECTIONS: SidebarNavSection[] = [
   {
     items: [
       {
-        title: "Overview",
+        title: "Dashboard",
         url: "/overview",
         icon: Home,
       },
-    ],
-  },
-  {
-    label: "BUILD",
-    items: [
       {
         title: "Voice Agents",
         url: "/workflow",
-        icon: Workflow,
+        icon: Phone,
       },
       {
         title: "Campaigns",
         url: "/campaigns",
-        icon: Megaphone,
+        icon: Send,
+      },
+      {
+        title: "Conversations",
+        url: "/recordings",
+        icon: MessageSquare,
       },
       {
         title: "Models",
         url: "/model-configurations",
-        icon: Brain,
+        icon: Box,
       },
       {
         title: "Telephony",
@@ -114,7 +114,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       {
         title: "Files",
         url: "/files",
-        icon: Database,
+        icon: Folder,
       },
       {
         title: "Recordings",
@@ -124,17 +124,17 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       {
         title: "Developers",
         url: "/api-keys",
-        icon: Key,
+        icon: Code2,
       },
     ],
   },
   {
-    label: "OBSERVE",
+    label: "Analytics",
     items: [
       {
         title: "Agent Runs",
         url: "/usage",
-        icon: TrendingUp,
+        icon: Activity,
       },
       {
         title: "Reports",
@@ -163,8 +163,6 @@ export function AppSidebar() {
   const isCollapsed = !isMobile && state === "collapsed";
 
   // Get selected team for Stack auth (cast to Team type from Stack)
-  // Stabilize the reference so SelectedTeamSwitcher only sees a change when the team ID changes,
-  // preventing unnecessary PATCH calls to Stack Auth on every route navigation.
   const selectedTeamRef = useRef<Team | null>(null);
   const rawSelectedTeam = provider === "stack" && getSelectedTeam ? getSelectedTeam() as Team | null : null;
   if (rawSelectedTeam?.id !== selectedTeamRef.current?.id) {
@@ -175,19 +173,36 @@ export function AppSidebar() {
   // Version info from app config context
   const versionInfo = config ? { ui: config.uiVersion, api: config.apiVersion } : null;
 
-  // Check for updates only on self-hosted (OSS) deployments — cloud is managed for the user.
-  const { latest: latestRelease, isBehind, isLatest } = useLatestReleaseVersion(
+  // Check for updates only on self-hosted (OSS) deployments
+  const { isLatest } = useLatestReleaseVersion(
     versionInfo?.ui,
     { enabled: config?.deploymentMode === "oss" },
   );
 
-  const isActive = (path: string) => pathname.startsWith(path);
+  const isActive = (path: string) => {
+    if (path === "/overview") {
+      return pathname === "/" || pathname === "/overview";
+    }
+    return pathname.startsWith(path);
+  };
 
   const handleMobileNavClick = () => {
     if (isMobile) {
       setOpenMobile(false);
     }
   };
+
+  // Derive user info matching Rahman / Administrator in reference image
+  const userDisplayName = user?.displayName || (user as { name?: string })?.name;
+  const userEmail = (user as LocalUser | undefined)?.email || (user as { primaryEmail?: string })?.primaryEmail || "";
+  const userName = userDisplayName || (userEmail ? userEmail.split("@")[0] : "Rahman");
+  const userRole = "Administrator";
+  const userInitials = (userDisplayName || userEmail || "Rahman")
+    .split(/[\s@._-]/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s: string) => s[0]?.toUpperCase())
+    .join("") || "RG";
 
   const SidebarLink = ({ item }: { item: SidebarNavItem }) => {
     const isItemActive = isActive(item.url);
@@ -218,19 +233,31 @@ export function AppSidebar() {
         asChild
         tooltip={tooltip}
         className={cn(
-          "hover:bg-accent hover:text-accent-foreground",
-          isItemActive && "bg-accent text-accent-foreground"
+          "relative h-9.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150",
+          isItemActive
+            ? "bg-blue-50/80 font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400"
+            : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-100"
         )}
       >
         <Link
           href={item.url}
           onClick={handleMobileNavClick}
-          className={cn("relative", isCollapsed && "justify-center")}
+          className={cn("relative flex items-center gap-3 w-full", isCollapsed && "justify-center px-0")}
           translate="no"
         >
-          <Icon className="h-4 w-4 shrink-0" />
+          {/* Active left indicator pill like in the reference image */}
+          {isItemActive && (
+            <span className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-blue-600 dark:bg-blue-500" />
+          )}
+
+          <Icon
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              isItemActive ? "text-blue-600 dark:text-blue-400" : "text-slate-500 dark:text-slate-400"
+            )}
+          />
           <span
-            className={cn("notranslate min-w-0 flex-1 truncate", isCollapsed && "sr-only")}
+            className={cn("notranslate min-w-0 flex-1 truncate text-sm", isCollapsed && "sr-only")}
             translate="no"
           >
             {item.title}
@@ -255,64 +282,50 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b px-2 py-3 notranslate" translate="no">
+    <Sidebar collapsible="icon" className="border-r border-border/60 bg-background">
+      {/* Brand Header */}
+      <SidebarHeader className="border-b border-border/50 px-3.5 py-4 notranslate" translate="no">
         <div className="flex items-center justify-between">
-          <div className={cn("flex items-center gap-2", isCollapsed && "hidden")}>
-            <Link
-              href="/"
-              className="notranslate flex items-center gap-2 px-2 text-xl font-bold"
-              translate="no"
-            >
-              Jamure Voice AI
-              {versionInfo && (
-                <span
-                  className="notranslate text-xs font-normal text-muted-foreground"
+          {isCollapsed ? (
+            <div className="mx-auto flex flex-col items-center gap-2">
+              <Link href="/" title="Jamure Voice AI">
+                <JamureLogo size="md" showText={false} />
+              </Link>
+              <SidebarTrigger className="hover:bg-accent" />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 min-w-0">
+                <Link
+                  href="/"
+                  className="notranslate flex items-center gap-3 px-0.5 group"
                   translate="no"
                 >
-                  v{versionInfo.ui}
-                </span>
-              )}
-            </Link>
-            {/* {isBehind && latestRelease && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <a
-                    href="https://docs.dograh.com/deployment/update"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md border bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-900 transition-opacity hover:opacity-80 dark:bg-amber-950 dark:text-amber-200"
-                  >
-                    <ArrowUpCircle className="h-3 w-3" />
-                    Update
-                  </a>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Latest: {latestRelease} — click to see the update guide</p>
-                </TooltipContent>
-              </Tooltip>
-            )} */}
-            {isLatest && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center rounded-md border bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                  <JamureLogo size="md" showText={false} />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-bold tracking-tight text-foreground truncate">
+                      Jamure Voice AI
+                    </span>
+                    <span
+                      className="notranslate text-xs text-muted-foreground shrink-0"
+                      translate="no"
+                    >
+                      v{versionInfo?.ui || "1.34.0"}
+                    </span>
+                  </div>
+                </Link>
+                {isLatest && (
+                  <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium leading-none text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                     Latest
                   </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>You&apos;re running the latest release</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
+                )}
+              </div>
 
-          <SidebarTrigger className={cn("hover:bg-accent", isCollapsed && "mx-auto")}>
-            {isCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </SidebarTrigger>
+              <SidebarTrigger className="hover:bg-accent h-7 w-7 rounded-lg text-muted-foreground">
+                <ChevronLeft className="h-4 w-4" />
+              </SidebarTrigger>
+            </>
+          )}
         </div>
 
         {provider === "stack" && (
@@ -333,16 +346,17 @@ export function AppSidebar() {
         )}
       </SidebarHeader>
 
-      <SidebarContent className={cn("notranslate", isCollapsed && "px-0")} translate="no">
+      {/* Navigation Content */}
+      <SidebarContent className={cn("px-2 py-2 notranslate", isCollapsed && "px-0")} translate="no">
         {NAV_SECTIONS.map((section, index) => (
           <SidebarGroup
             key={section.label ?? "overview"}
-            className={index === 0 ? "mt-2" : "mt-6"}
+            className={index === 0 ? "pt-1" : "pt-4"}
           >
             {section.label && (
               <SidebarGroupLabel
                 className={cn(
-                  "notranslate text-xs font-semibold uppercase tracking-wider text-muted-foreground",
+                  "notranslate text-xs font-semibold text-slate-400 dark:text-slate-500 px-3 mb-1.5 tracking-normal",
                   isCollapsed && "hidden"
                 )}
                 translate="no"
@@ -350,7 +364,7 @@ export function AppSidebar() {
                 {section.label}
               </SidebarGroupLabel>
             )}
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {section.items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarLink item={item} />
@@ -361,123 +375,65 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
+      {/* Footer Profile Section */}
       <SidebarFooter
-        className={cn("border-t p-4 notranslate", isCollapsed && "p-2")}
+        className={cn("border-t border-border/50 p-3 notranslate", isCollapsed && "p-2")}
         translate="no"
       >
-        <div className="space-y-2">
-          {provider !== "stack" && (
-            <div className={cn("flex", isCollapsed ? "justify-center" : "justify-start")}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer rounded-full">
-                    <span className="text-xs font-medium">
-                      {(user?.displayName || (user as LocalUser | undefined)?.email || "")
-                        .split(/[\s@]/)
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((s: string) => s[0]?.toUpperCase())
-                        .join("")
-                        || "U"}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" align="start" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      {(user as LocalUser | undefined)?.email && (
-                        <p className="text-xs text-muted-foreground">{(user as LocalUser).email}</p>
-                      )}
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Platform Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          {provider === "stack" && (
-            <div className={cn("flex", isCollapsed ? "justify-center" : "justify-start")}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer rounded-full">
-                    <span className="text-xs font-medium">
-                      {(user?.displayName || (user as { primaryEmail?: string })?.primaryEmail || "")
-                        .split(/[\s@]/)
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((s: string) => s[0]?.toUpperCase())
-                        .join("")
-                        || "U"}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" align="start" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      {user?.displayName && (
-                        <p className="text-sm font-medium">{user.displayName}</p>
-                      )}
-                      {(user as { primaryEmail?: string })?.primaryEmail && (
-                        <p className="text-xs text-muted-foreground">{(user as { primaryEmail?: string }).primaryEmail}</p>
-                      )}
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/handler/account-settings")} className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Account settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Platform Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/usage")} className="cursor-pointer">
-                    <CircleDollarSign className="mr-2 h-4 w-4" />
-                    Usage
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          <div className={cn("mt-2 border-t pt-2", isCollapsed && "flex justify-center")}>
-            {isCollapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="notranslate" translate="no">
-                    <ThemeToggle
-                      showLabel={false}
-                      className="hover:bg-accent hover:text-accent-foreground"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>Toggle theme</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <div className="notranslate" translate="no">
-                <ThemeToggle
-                  showLabel={true}
-                  className="hover:bg-accent hover:text-accent-foreground"
-                />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={cn(
+                "flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-accent/60 outline-hidden",
+                isCollapsed && "justify-center p-1"
+              )}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-semibold text-xs shadow-xs">
+                {userInitials}
               </div>
-            )}
-          </div>
-        </div>
+              {!isCollapsed && (
+                <>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-xs font-semibold text-foreground">
+                      {userName}
+                    </span>
+                    <span className="truncate text-[11px] text-muted-foreground">
+                      {userRole}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground ml-auto" />
+                </>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56 rounded-xl p-1.5 shadow-lg">
+            <DropdownMenuLabel className="font-normal px-2 py-1.5">
+              <div className="flex flex-col space-y-0.5">
+                <p className="text-xs font-semibold text-foreground">{userName}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{userEmail || "administrator@jamure.ai"}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer rounded-lg text-xs">
+              <Settings className="mr-2 h-4 w-4" />
+              Platform Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/usage")} className="cursor-pointer rounded-lg text-xs">
+              <CircleDollarSign className="mr-2 h-4 w-4" />
+              Usage & Billing
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1">
+              <ThemeToggle showLabel={true} className="w-full justify-start text-xs h-8" />
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => logout()} className="cursor-pointer rounded-lg text-xs text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
