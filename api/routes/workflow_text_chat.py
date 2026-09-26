@@ -266,6 +266,8 @@ async def rewind_text_chat_session(
             cursor_turn_id=request.cursor_turn_id,
             expected_revision=request.expected_revision,
         )
+    except TextChatSessionRevisionConflictError as e:
+        raise HTTPException(status_code=409, detail=_revision_conflict_detail(e))
     return _build_response(text_session)
 
 

@@ -60,6 +60,23 @@ export default function RootLayout({
                   }
                 } catch (e) {}
               })();
+
+              // Auto-recover from chunk load errors when new builds are deployed
+              (function() {
+                function handleChunkError(err) {
+                  var msg = String((err && (err.message || err.reason || err)) || '');
+                  if (/loading chunk|chunkloaderror/i.test(msg) || (err && err.name === 'ChunkLoadError')) {
+                    var lastReload = sessionStorage.getItem('last_chunk_reload');
+                    var now = Date.now();
+                    if (!lastReload || (now - parseInt(lastReload, 10)) > 8000) {
+                      sessionStorage.setItem('last_chunk_reload', String(now));
+                      window.location.reload();
+                    }
+                  }
+                }
+                window.addEventListener('error', function(e) { handleChunkError(e.error || e.message); });
+                window.addEventListener('unhandledrejection', function(e) { handleChunkError(e.reason); });
+              })();
             `,
           }}
         />

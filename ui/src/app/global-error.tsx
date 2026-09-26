@@ -6,6 +6,16 @@ import { useEffect } from "react";
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
+    const msg = error?.message || "";
+    if (/loading chunk|chunkloaderror/i.test(msg) || error?.name === "ChunkLoadError") {
+      const lastReload = sessionStorage.getItem("last_chunk_reload");
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 8000) {
+        sessionStorage.setItem("last_chunk_reload", String(now));
+        window.location.reload();
+        return;
+      }
+    }
     Sentry.captureException(error);
   }, [error]);
 
