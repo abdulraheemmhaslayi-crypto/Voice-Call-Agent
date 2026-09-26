@@ -155,13 +155,17 @@ export function WhatsAppCallScreen({
       setTranscriptMessages([]);
       setSubtitles(null);
 
-      // Determine backend API URL
-      const currentHost = typeof window !== "undefined" ? window.location.hostname : "localhost";
+      // Determine backend API URL (use origin on production, localhost:8000 on local dev)
+      const isLocal =
+        typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
       const apiBaseUrl =
         process.env.NEXT_PUBLIC_BACKEND_URL ||
-        (currentHost === "localhost" || currentHost === "127.0.0.1"
+        (isLocal
           ? "http://localhost:8000"
-          : `${window.location.protocol}//${window.location.host}:8000`);
+          : typeof window !== "undefined"
+          ? window.location.origin
+          : "");
 
       // 1. Get Embed Token
       let token = initialToken;
@@ -198,7 +202,6 @@ export function WhatsAppCallScreen({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Origin: window.location.origin,
         },
         body: JSON.stringify({ token }),
       });
@@ -216,8 +219,7 @@ export function WhatsAppCallScreen({
       let iceServers: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }];
       try {
         const turnResp = await fetch(
-          `${apiBaseUrl}/api/v1/public/embed/turn-credentials/${sessionToken}`,
-          { headers: { Origin: window.location.origin } }
+          `${apiBaseUrl}/api/v1/public/embed/turn-credentials/${sessionToken}`
         );
         if (turnResp.ok) {
           const turnData = await turnResp.json();
