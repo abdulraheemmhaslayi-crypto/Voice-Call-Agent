@@ -44,7 +44,7 @@ ENV BACKEND_URL="http://api:8000"
 
 # Build the application with standalone mode
 # Increase Node.js heap size to prevent out-of-memory errors during build
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN --mount=type=cache,target=/app/.next/cache \
     npm run build
 
